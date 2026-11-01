@@ -38,6 +38,7 @@ const promotion = promotions[currentIndex];
 
     return () => clearInterval(interval);
   }, [promotions.length]);
+
   if (promotions.length === 0) return null;
   return (
     <section className="promotional-banner">
@@ -45,8 +46,8 @@ const promotion = promotions[currentIndex];
         <h2>{promotion.title}</h2>
         <p>{promotion.description}</p>
 
-        <Link href={promotion.buttonLink}>
-          {promotion.buttonText}
+        <Link href={promotion.button_link}>
+          {promotion.button_text}
         </Link>
       </div>
       
@@ -54,7 +55,7 @@ const promotion = promotions[currentIndex];
         type="button"
         className="slideButton"
         onClick={() => {
-          setCurrentIndex(c => (c + 1) % activePromotions.length);
+          setCurrentIndex(c => (c + 1) % promotions.length);
         }}
       >
         →
