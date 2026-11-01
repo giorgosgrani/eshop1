@@ -1,6 +1,7 @@
 import "./globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { Suspense } from "react";
 
 export const metadata = {
   title: "Eshop1",
@@ -11,7 +12,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="el">
       <body>
-        <Header />
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
 
         <main>{children}</main>
 

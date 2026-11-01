@@ -2,7 +2,7 @@
 import { products } from "../../lib/supabase/products";
 import ProductCard from "../../components/ProductCard";
 import ProductFilters from "../../components/ProductFilters";
-
+import { Suspense } from "react";
 
 
 export default async function ProductsPage({ searchParams }) {
@@ -45,7 +45,9 @@ const filteredProducts = categoryProducts.filter((product) => {
         </select>
         </div>
       <div className="products-layout">
-        <ProductFilters key={category ?? "all"} maxPriceStart ={maxPriceStart}/>
+        <Suspense fallback={<p>Φόρτωση φίλτρων...</p>}>
+          <ProductFilters maxPriceStart={maxPriceStart} />
+        </Suspense>
 
         <div className="products-grid">
           {filteredProducts.map((product) => (

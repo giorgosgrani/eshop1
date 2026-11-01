@@ -13,6 +13,7 @@ import {
 import { useState, useEffect } from "react";
 import { createClient } from "../lib/supabase/client";
 
+
 export default function Header(){
    const pathname = usePathname();
    const [menuOpen, setMenuOpen] = useState(false);

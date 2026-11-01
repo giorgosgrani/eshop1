@@ -5,6 +5,7 @@ import FeaturedProducts from "../components/FeaturedProducts.jsx";
 import BenefitsSection from "../components/BenefitsSection";
 import PromotionalBanner from "../components/PromotionalBanner.jsx";
 
+
 export default function Home() {
   return (
     <main>
