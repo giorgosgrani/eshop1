@@ -2,40 +2,43 @@
 
 import Link from "next/link";
 import { useState,useEffect} from "react";
+import { createClient } from "../lib/supabase/client";
 
 export default function PromotionalBanner() {
-const promotions = [
-  {
-    id: 1,
-    title: "Νέα συλλογή",
-    description: "Ανακάλυψε τις νέες αφίξεις",
-    image: "/images/promo-1.png",
-    buttonText: "Δες τη συλλογή",
-    buttonLink: "/products",
-    isActive: true,
-  },
-  {
-    id: 2,
-    title: "Εκπτώσεις έως -40%",
-    description: "Μοναδικές προσφορές",
-    image: "/images/promo-2.png",
-    buttonText: "Δες τις προσφορές",
-    buttonLink: "/offers",
-    isActive: true,
-  },
-];
+const [promotions,setPromotions]=useState([]);
 const [currentIndex, setCurrentIndex] = useState(0);
+const supabase = createClient();
 
-const activePromotions = promotions.filter((promo) => promo.isActive);
-const promotion = activePromotions[currentIndex];
+useEffect(()=>{
+  async function loadPromo(){
+    const {data,error}= await supabase
+      .from("promo_banners")
+      .select("*")
+      .eq("is_active",true)
+      .order("position");
 
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      setCurrentIndex(c => (c + 1) % activePromotions.length);
-    },5000);
+    if(error){
+      console.error("error retrieving promo",error);
+      return;
+    }
+    setPromotions(data);  
+  }
+  loadPromo();
+},[]);
+
+
+const promotion = promotions[currentIndex];
+
+  useEffect(() => {
+    if (promotions.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex(c => (c + 1) % promotions.length);
+    }, 5000);
+
     return () => clearInterval(interval);
-  },[]);
-
+  }, [promotions.length]);
+  if (promotions.length === 0) return null;
   return (
     <section className="promotional-banner">
       <div className="promo-content">
