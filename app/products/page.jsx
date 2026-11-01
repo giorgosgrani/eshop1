@@ -1,38 +1,49 @@
 
-import { products } from "../../lib/products";
+import { products } from "../../lib/supabase/products";
 import ProductCard from "../../components/ProductCard";
 import ProductFilters from "../../components/ProductFilters";
 
 
+
 export default async function ProductsPage({ searchParams }) {
   const { category, price, size } = await searchParams;
+  
 
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory =
-      !category || product.category === category;
+// 1. Φιλτράρουμε ΜΟΝΟ την κατηγορία
+const categoryProducts = products.filter(
+  (product) => !category || product.category === category
+);
 
-    const matchesPrice =
-      !price || product.price <= Number(price);
+// 2. Υπολογίζουμε τη μέγιστη τιμή της κατηγορίας
+const maxPriceStart = Math.ceil(
+  Math.max(0, ...categoryProducts.map((product) => product.price))
+);
 
-    const matchesSize =
-      !size || size === "all" || product.sizes?.includes(size);
+// 3. ΜΕΤΑ εφαρμόζουμε τα υπόλοιπα φίλτρα
+const filteredProducts = categoryProducts.filter((product) => {
+  const matchesPrice = !price || product.price <= Number(price);
+  const matchesSize =
+    !size || size === "all" || product.sizes?.includes(size);
 
-    return matchesCategory && matchesPrice && matchesSize;
-  });
-
-  //console.log(filteredProducts);
-
-     const maxPriceStart = Math.max(
-    ...filteredProducts.map(product => product.price)
-  );
+  return matchesPrice && matchesSize;
+});
   
  
 
   return (
     <main className="products-page">
-      <h1>Τα προϊόντα μας</h1>
+      
+        <h1>Τα προϊόντα μας</h1>
+        
+        
+        <div className="productpage-header">
       <p>{filteredProducts.length} προϊόντα</p>
-
+      <select className="filter-select">
+          <option value="">Δημοφιλή</option>
+          <option value="">Αύξουσα</option>
+          <option value="">Φφίνουσα</option>
+        </select>
+        </div>
       <div className="products-layout">
         <ProductFilters key={category ?? "all"} maxPriceStart ={maxPriceStart}/>
 

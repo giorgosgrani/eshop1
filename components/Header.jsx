@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname,useSearchParams  } from "next/navigation";
 import {
   Search,
   UserRound,
@@ -10,12 +10,38 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "../lib/supabase/client";
 
 export default function Header(){
    const pathname = usePathname();
    const [menuOpen, setMenuOpen] = useState(false);
    const [openCategories,setOpenCategories]= useState(false);
+   const supabase = createClient();
+   const searchParams = useSearchParams();
+   const [categories,setCategories]= useState([]);
+
+   useEffect(()=>{
+    async function loadCat(){
+      const {data,error} =await supabase
+        .from("categories")
+        .select("*");
+
+      if(error){
+        console.error("error retrieving categories", error);
+        return;
+      }
+      setCategories(data);  
+      //console.log(data);
+    }
+
+    loadCat();
+   },[]);
+
+    useEffect(() => {
+      setOpenCategories(false);
+      setMenuOpen(false);
+    }, [pathname, searchParams]);
 
 
   return(
@@ -47,10 +73,10 @@ export default function Header(){
                 openCategories ? "openCategoriesMenu" : ""
               }`}
             >
-              <Link href="/products?category=clothes">Ρούχα</Link>
-              <Link href="/products?category=shoes">Παπούτσια</Link>
-              <Link href="/products?category=bags">Τσάντες</Link>
-              <Link href="/products?category=accessories">Αξεσουάρ</Link>
+              {categories.map((category)=>
+                (<Link key = {category.id } onClick={() => setOpenCategories(false)} href={`/products?category=${category.slug}`}>{category.name}</Link>))}
+              
+              
             </div>
           </div>
           <Link href="/discounts" className={pathname === "/discounts" ? "selected" : ""}>Προσφορές</Link>

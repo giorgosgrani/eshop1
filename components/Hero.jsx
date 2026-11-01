@@ -1,41 +1,41 @@
 "use client"
 import Link from "next/link";
 import { useState,useEffect } from "react";
+import { createClient } from "../lib/supabase/client";
 
 export default function Hero(){
   const [slideCount,setSlideCount] = useState(0);
-
-  const slides = [
-  {
-    id: 1,
-    title: "Νέα Συλλογή",
-    subtitle:"Στυλ που",
-    subtitle2:"ξεχωριζει",
-    description: "Ανακάλυψε τη νέα συλλογή με μοντέρνα ρούχα και αξεσουάρ για κάθε περίσταση.",
-    image:'/images/hero-fashion.png',
-    buttonText: "Δες την συλλογή",
-    buttonLink: "/products",
-  },
-  {
-    id: 2,
-    title: "Ειδικές Προσφορές",
-    subtitle:"Νέες χαμηλές",
-    subtitle2:"τιμές",
-    description: "Δες τις προσφορές μας",
-    image: "/images/hero-offers.png",
-    buttonText: "Δες περισσότερα",
-    buttonLink: "/discounts",
-  },
-];
+  const [slides,setSlides]=useState([]);
+  const supabase = createClient();
 
   useEffect(()=>{
-    const interval = setInterval(()=>{
-      setSlideCount(c => (c + 1) % slides.length);
-    },5000);
-    return () => clearInterval(interval);
+    async function loadHero(){
+      const {data,error} = await supabase
+        .from("hero_slides")
+        .select("*")
+        .eq("is_active",true)
+        .order("position");
+
+      if(error){
+        console.error("error retrieving hero data",error);
+        return;
+      }
+      setSlides(data);  
+    }
+    loadHero();
   },[]);
 
+  useEffect(() => {
+  if (slides.length === 0) return;
 
+  const interval = setInterval(() => {
+    setSlideCount(c => (c + 1) % slides.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+  }, [slides.length]);
+
+  if (slides.length === 0) return null;
   return(
   <section className="hero" 
     style={{
@@ -59,8 +59,8 @@ export default function Hero(){
         </p>
 
         <div className="hero-buttons">
-          <Link href={slides[slideCount].buttonLink} className="hero-btn-primary">
-            {slides[slideCount].buttonText} →
+          <Link href={slides[slideCount].button_link} className="hero-btn-primary">
+            {slides[slideCount].button_text} →
           </Link>
         </div>
         <button className="slideButton" 
