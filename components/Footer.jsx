@@ -62,11 +62,11 @@ export default function Footer() {
           <div className="footer-column">
             <h3>Εξυπηρέτηση</h3>
 
-            <Link href="/shipping">Τρόποι Αποστολής</Link>
-            <Link href="/returns">Επιστροφές</Link>
-            <Link href="/terms">Όροι Χρήσης</Link>
-            <Link href="/privacy">Πολιτική Απορρήτου</Link>
-            <Link href="/cookies">Πολιτική Cookies</Link>
+            <Link href="/extras?type=shipping">Τρόποι Αποστολής</Link>
+            <Link href="/extras?type=returns">Επιστροφές</Link>
+            <Link href="/extras?type=terms">Όροι Χρήσης</Link>
+            <Link href="/extras?type=privacy">Πολιτική Απορρήτου</Link>
+            <Link href="/extras?type=cookies">Πολιτική Cookies</Link>
           </div>
 
           {/* Newsletter */}
