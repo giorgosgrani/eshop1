@@ -1,7 +1,9 @@
+
 "use client"
 import Link from "next/link";
 import {Heart,ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createClient } from "../lib/supabase/client";
 
 export default function ProductCard({
   id,
@@ -11,9 +13,86 @@ export default function ProductCard({
   image,
   category,
   link,
-  sizes
+  sizes,
+  initialFavorite = false
 }) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(initialFavorite);
+  const supabase =createClient();
+  const [user, setUser] = useState(null);
+
+  useEffect(()=>{
+    async function checkUser() {
+      const { data: { user },error } = await supabase.auth.getUser();
+
+      if(error&& error.name !== "AuthSessionMissingError"){
+        console.error("Auth error:", error.message);
+        return;
+      }
+      if(user){
+        setUser(user);
+      }else {
+        const favorites = JSON.parse(
+          localStorage.getItem("favorites") || "[]"
+        );
+
+        setIsFavorite(favorites.includes(id));
+      }
+  }
+  checkUser();
+  },[]);
+  
+  async function handleFavorites(isFavorite,product_id,user){
+
+    if(user){
+      if(isFavorite){
+        const {error}=await supabase
+          .from("favorites")
+          .insert({
+            user_id:user.id,
+            product_id:product_id
+          })
+
+        if(error){
+          console.log("error adding favorite",error);
+          return;
+        }
+      }
+      else{
+        const {error}=await supabase
+          .from("favorites")
+          .delete()
+          .eq("user_id",user.id)
+          .eq("product_id",id)
+
+        if(error){
+          console.log("error deleting favorite",error);
+          return;
+        }
+      }
+    setIsFavorite(isFavorite);  
+    }
+    else {
+      const favorites = JSON.parse(
+        localStorage.getItem("favorites") || "[]"
+      );
+
+      if (isFavorite) {
+        favorites.push(product_id);
+      } 
+      else {
+        const index = favorites.indexOf(product_id);
+
+        if (index !== -1) {
+          favorites.splice(index, 1);
+        }
+      }
+
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+
+    setIsFavorite(isFavorite);
+    }
+    
+  }
 
   return (
     <div className="product-card">
@@ -24,7 +103,11 @@ export default function ProductCard({
         <button
           type="button"
           className="favorite-btn"
-          onClick={() => setIsFavorite(prev => !prev)}
+          onClick={() =>{
+            const newFav =!isFavorite;
+            handleFavorites(newFav,id,user)
+            }
+          }
           aria-label={isFavorite ? "Αφαίρεση από αγαπημένα" : "Προσθήκη στα αγαπημένα"}
           aria-pressed={isFavorite}
         >
