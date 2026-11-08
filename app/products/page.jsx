@@ -43,6 +43,8 @@ export default async function ProductsPage({ searchParams }) {
     sizes: (product.product_variants ?? [])
       .filter((variant) => variant.stock > 0)
       .map((variant) => variant.size),
+    isOutOfStock: (product.product_variants ?? [])
+      .every((variant) => variant.stock === 0),  
   }));
 
   // 4. Φιλτράρουμε πρώτα την κατηγορία

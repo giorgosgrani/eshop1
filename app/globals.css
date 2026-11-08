@@ -172,7 +172,8 @@ main {
 }
 
 .nav-links a,
-.header-actions a {
+.header-actions  a,
+.header-actions .header-action{
   color: #374151;
   font-size: 14px;
   font-weight: 600;
@@ -184,13 +185,15 @@ main {
 }
 
 .nav-links a.selected,
-.header-actions a.selected {
+.header-actions a.selected,
+.header-actions div.selected {
   color: #021949;
   border-bottom: 2px solid #021949;
 }
 
 .nav-links a:hover,
-.header-actions a:hover {
+.header-actions a:hover,
+.header-actions div:hover  {
   color: #2563eb;
 }
 
@@ -241,7 +244,7 @@ main {
 }
 
 .header-action,
-.header-actions a {
+.header-actions > a {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1052,6 +1055,9 @@ main {
   box-shadow:0px 12px 35px #00000015;
   scroll-snap-align: start;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 .favorite-btn {
   position: absolute;
@@ -1093,15 +1099,16 @@ main {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex:1;
 }
 
-.product-details span:first-child {
+.product-details > span:first-child {
   font-size: 16px;
   font-weight: 600;
   color: #111827;
 }
 
-.product-details span:nth-child(2) {
+.product-details > span:nth-child(2) {
   font-size: 17px;
   color: #6b7280;
   font-weight: 700;
@@ -1122,6 +1129,7 @@ main {
   text-align: center;
   padding: 5px;
   gap: 12px;
+  margin-top: auto;
 }
 .add-to-cart:hover {
   transform: scale(1.05);
@@ -1159,11 +1167,11 @@ main {
     gap: 6px;
   }
 
-  .product-details span:first-child {
+  .product-details > span:first-child {
     font-size: 12px;
   }
 
-  .product-details span:nth-child(2) {
+  .product-details > span:nth-child(2) {
     font-size: 13px;
   }
 
@@ -1498,7 +1506,15 @@ main {
 
 .sizes-flex1{
   display: flex;
-  gap:8px
+  gap:8px;
+  flex-wrap: wrap;
+}
+.sizes-flex1 >span{
+  display: inline-block;
+  font-size: 15px;
+  padding: 3px 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 .productpage-header{
   display: flex;
@@ -2463,5 +2479,286 @@ main {
 
   .empty-favorite h2 {
     font-size: 21px;
+  }
+}
+.original-price {
+  text-decoration: line-through;
+  color: #999;
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+
+/* =========================
+   REGISTER PAGE
+========================= */
+
+.form-container {
+  min-height: calc(100vh - 100px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 20px;
+  background-color: #f8f9fb;
+}
+
+.form-page {
+  width: 100%;
+  max-width: 640px;
+  padding: 45px;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.05);
+}
+
+.form-page h2 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  text-align: center;
+}
+
+.form-page > span {
+  display: block;
+  margin-bottom: 32px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* FORM */
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.register-form .form-row {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.register-form .form-row label {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 9px;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.register-form .form-row input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 14px;
+  color: #111827;
+  background-color: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.register-form .form-row input:hover {
+  border-color: #9ca3af;
+}
+
+.register-form .form-row input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+/* REGISTER BUTTON */
+
+.register-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 8px;
+  padding: 12px 20px;
+  color: #fff;
+  background-color: #111827;
+  border: none;
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.register-button:hover {
+  background-color: #374151;
+  transform: translateY(-1px);
+}
+
+.register-button:active {
+  transform: translateY(0);
+}
+
+.register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .form-container {
+    min-height: auto;
+    align-items: flex-start;
+    padding: 30px 14px 50px;
+  }
+
+  .form-page {
+    padding: 30px 20px;
+    border-radius: 14px;
+  }
+
+  .form-page h2 {
+    font-size: 24px;
+  }
+
+  .form-page > span {
+    font-size: 13px;
+    margin-bottom: 25px;
+  }
+
+  .register-form {
+    gap: 18px;
+  }
+
+  .register-form .form-row {
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .register-form .form-row input {
+    height: 45px;
+  }
+
+  .register-button {
+    min-height: 46px;
+  }
+}
+
+.user-avatar:hover{
+  background-color: #374151;
+  transform: translateY(-1px);
+  
+}
+.account-wrapper {
+  position: relative;
+}
+
+.user-avatar {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background-color: #111827;
+  color: white;
+  border: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.signOff-drop {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  min-width: 160px;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  z-index: 200;
+}
+
+
+.signOff-drop button {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.signOff-drop button:hover {
+  background-color: #f3f4f6;
+}
+
+.accountdrop-wrapper {
+  position: relative;
+}
+
+.account-drop {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+
+  min-width: 140px;
+  flex-direction: column;
+  gap: 0;
+  padding: 6px 0;
+
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  z-index: 300;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .accountdrop-wrapper:hover .account-drop {
+    display: flex;
+  }
+}
+
+.account-drop > a {
+  display: block;
+  padding: 10px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.account-drop > a:hover {
+  background-color: #f3f4f6;
+}
+@media (hover: none), (pointer: coarse) {
+  .account-drop.account-open {
+    display: flex;
   }
 }

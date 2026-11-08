@@ -14,6 +14,7 @@ export default function ProductCard({
   category,
   link,
   sizes,
+  isOutOfStock = false,
   initialFavorite = false
 }) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
@@ -88,6 +89,7 @@ export default function ProductCard({
       }
 
     localStorage.setItem("favorites", JSON.stringify(favorites));
+    window.dispatchEvent(new Event("favoritesChanged"));
 
     setIsFavorite(isFavorite);
     }
@@ -121,11 +123,19 @@ export default function ProductCard({
 
       <div className="product-details">
         <span>{name}</span>
-        <span>{price} €</span>
+        <span>{price} € {originalPrice != null && (
+          <span className="original-price">
+            {originalPrice} €
+          </span>
+        )}</span>
         <span className="sizes-flex1">
-          {(sizes).map((size) => (
-            <span key={size}>{size}</span>
-          ))}
+          {isOutOfStock ? (
+            <span>Εξαντλήθηκε</span>
+          ) : (
+            sizes.map((size) => (
+              <span key={size}>{size}</span>
+            ))
+          )}
         </span>
       </div>
       <div className="add-to-cart"><ShoppingCart size={20} color="white"/>Προσθήκη στο καλάθι</div>
