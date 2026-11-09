@@ -52,8 +52,7 @@ export default function CategoriesSection() {
     <div className="categoriesSection">
       <div className="categories-top">
         <div className="categories-heading">
-          <span>ΚΑΤΗΓΟΡΙΕΣ</span>
-          <h2>Αγόρασε ανά κατηγορία</h2>
+          <h2>Κατηγορίες</h2>
           <p>Ανακάλυψε τη συλλογή που σου ταιριάζει.</p>
         </div>
 

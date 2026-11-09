@@ -1021,8 +1021,9 @@ main {
   }
 
   .category-card {
-    flex: 0 0 48%;
+    flex: 0 0 68%;
     scroll-snap-align: start;
+    min-height: 180px
   }
 
   .categories-arrows {
