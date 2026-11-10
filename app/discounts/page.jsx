@@ -5,7 +5,7 @@ import ProductFilters from "../../components/ProductFilters";
 import { Suspense } from "react";
 import ProductSort from "../../components/ProductSort";
 
-export default async function DiscountPage({ searchParams }) {
+export default async function Discounts({ searchParams }) {
   const { category, price, size ,sort } = await searchParams;
 
   // 1. Δημιουργούμε τον Supabase client στον server
@@ -17,14 +17,31 @@ export default async function DiscountPage({ searchParams }) {
     .select(`
       *,
       categories(slug),
-      product_variants(size, stock)
+      product_variants(size, stock),
+      product_images(image_url, sort_order)
     `)
-    .eq("is_active", true)
-    .not("original_price", "is", null);
+    .eq("is_active", true);
 
   if (error) {
     console.error("Error fetching products:", error.message);
     return <p>Πρόβλημα κατά τη φόρτωση προϊόντων.</p>;
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let favoriteIds = [];
+
+  if (user) {
+    const { data: favorites, error: favoritesError } = await supabase
+      .from("favorites")
+      .select("product_id")
+      .eq("user_id", user.id);
+
+    if (favoritesError) {
+      console.error(favoritesError);
+    } else {
+      favoriteIds = (favorites ?? []).map(item => item.product_id);
+    }
   }
 
   // 3. Προσαρμόζουμε τα δεδομένα στο ProductCard
@@ -37,13 +54,20 @@ export default async function DiscountPage({ searchParams }) {
       product.original_price == null
         ? null
         : Number(product.original_price),
-    image: product.image,
     category: product.categories?.slug,
     link: `/products/${product.slug}`,
     isFeatured: product.is_featured,
     sizes: (product.product_variants ?? [])
       .filter((variant) => variant.stock > 0)
       .map((variant) => variant.size),
+    isOutOfStock: (product.product_variants ?? [])
+      .every((variant) => variant.stock === 0),
+    images: [
+    product.image,
+      ...(product.product_images ?? [])
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(item => item.image_url)
+    ].filter(Boolean),    
   }));
 
   // 4. Φιλτράρουμε πρώτα την κατηγορία
@@ -75,7 +99,7 @@ export default async function DiscountPage({ searchParams }) {
 
   return (
     <main className="products-page">
-      <h1>Ανακάλυψε τις εκπτώσεις</h1>
+      <h1>Τα προϊόντα μας</h1>
 
       <div className="productpage-header">
         <p>{filteredProducts.length} προϊόντα</p>
@@ -92,7 +116,12 @@ export default async function DiscountPage({ searchParams }) {
 
         <div className="products-grid">
           {sortedProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
+            <ProductCard 
+              key={product.id} 
+              {...product} 
+              initialFavorite={favoriteIds.includes(product.id)}
+              userId={user?.id ?? null}
+              />
           ))}
         </div>
       </div>

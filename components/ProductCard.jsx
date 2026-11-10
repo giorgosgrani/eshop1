@@ -4,13 +4,14 @@ import Link from "next/link";
 import {Heart,ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "../lib/supabase/client";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function ProductCard({
   id,
   name,
   price,
   originalPrice,
-  image,
+  images,
   category,
   link,
   sizes,
@@ -20,7 +21,18 @@ export default function ProductCard({
   onFavoriteRemoved
 }) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
+  const [currentImage, setCurrentImage] = useState(0);
   const supabase =createClient();
+
+  useEffect(() => {
+    if (userId) return;
+
+    const favorites = JSON.parse(
+      localStorage.getItem("favorites") || "[]"
+    );
+
+    setIsFavorite(favorites.includes(id));
+  }, [id, userId]);
   
   async function handleFavorites(isFavorite,product_id){
 
@@ -85,13 +97,50 @@ export default function ProductCard({
     }
     
   }
+  function moveImage(move){
+    if(move>0){
+      if(currentImage === images.length-1){
+        setCurrentImage(0);
+      }
+      else{
+        setCurrentImage(x=>x+move)
+      }
+    }
+    else{
+      if(currentImage===0){
+        setCurrentImage(images.length-1);
+      }
+      else{
+        setCurrentImage(x=>x+move)
+      }
+    }
+  }
 
   return (
     <div className="product-card">
       <div
         className="product-image"
-        style={{ backgroundImage: `url("${image}")` }}
+        style={{ backgroundImage: `url("${images[currentImage]}")` }}
       >
+                <div className="image-arrows">
+          <button
+            type="button"
+            className="image-prev"
+            onClick ={()=>moveImage(-1)}
+            aria-label="Προηγούμενη φωτογραφία"
+          >
+            <ChevronLeft size={22} />
+          </button>
+
+          <button
+            type="button"
+            className="image-next"
+            onClick ={()=>moveImage(1)}
+            aria-label="Επόμενη φωτογραφία"
+          >
+            <ChevronRight size={22} />
+          </button>
+        </div>
         <button
           type="button"
           className="favorite-btn"

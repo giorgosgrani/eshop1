@@ -13,19 +13,7 @@ export default function Favorites() {
   const [loading,setLoading]=useState(true);
   const [userId, setUserId] = useState(null);
   const supabase = createClient();
-/*
-  useEffect(() => {
-    const storedFavorites = JSON.parse(
-      localStorage.getItem("favorites") || "[]"
-    );
 
-    setFavorites(storedFavorites);
-  }, []);
-  */
-
-
-
-  //console.log(favorites);
 useEffect(() => {
   let cancelled = false;
 

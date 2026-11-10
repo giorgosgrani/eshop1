@@ -17,7 +17,8 @@ export default async function ProductsPage({ searchParams }) {
     .select(`
       *,
       categories(slug),
-      product_variants(size, stock)
+      product_variants(size, stock),
+      product_images(image_url, sort_order)
     `)
     .eq("is_active", true);
 
@@ -53,7 +54,6 @@ export default async function ProductsPage({ searchParams }) {
       product.original_price == null
         ? null
         : Number(product.original_price),
-    image: product.image,
     category: product.categories?.slug,
     link: `/products/${product.slug}`,
     isFeatured: product.is_featured,
@@ -61,7 +61,13 @@ export default async function ProductsPage({ searchParams }) {
       .filter((variant) => variant.stock > 0)
       .map((variant) => variant.size),
     isOutOfStock: (product.product_variants ?? [])
-      .every((variant) => variant.stock === 0),  
+      .every((variant) => variant.stock === 0),
+    images: [
+    product.image,
+      ...(product.product_images ?? [])
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map(item => item.image_url)
+    ].filter(Boolean),    
   }));
 
   // 4. Φιλτράρουμε πρώτα την κατηγορία

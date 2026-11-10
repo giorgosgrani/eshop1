@@ -2930,3 +2930,41 @@ main {
   flex-direction: column;
   align-items: center;
 }
+.image-arrows{
+  position: absolute; 
+  display: flex;
+  inset: 0;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+.image-arrows >button{
+  pointer-events: auto;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 2;
+  margin: 0 8px;
+  color: #111827;
+  -webkit-appearance: none;
+  appearance: none;
+  
+}
+
+@media (hover: hover) {
+  .image-arrows {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .product-image:hover .image-arrows,
+  .product-image:focus-within .image-arrows {
+    opacity: 1;
+  }
+}

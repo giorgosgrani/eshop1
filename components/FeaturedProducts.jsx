@@ -24,7 +24,8 @@ export default function FeaturedProducts() {
           original_price,
           image,
           is_featured,
-          product_variants(size, stock)
+          product_variants(size, stock),
+          product_images(image_url, sort_order)
         `)
         .eq("is_featured", true)
         .eq("is_active", true);
@@ -42,12 +43,17 @@ export default function FeaturedProducts() {
         originalPrice: product.original_price
           ? Number(product.original_price)
           : null,
-        image: product.image,
         link: `/products/${product.slug}`,
         isFeatured: product.is_featured,
         sizes: (product.product_variants ?? [])
           .filter((variant) => variant.stock > 0)
           .map((variant) => variant.size),
+        images: [
+          product.image,
+          ...(product.product_images ?? [])
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map(item => item.image_url)
+        ].filter(Boolean),  
       }));
 
       setProducts(formattedProducts);
