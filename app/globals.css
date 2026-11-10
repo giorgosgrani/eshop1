@@ -2763,3 +2763,170 @@ main {
     display: flex;
   }
 }
+/* LOGIN PAGE */
+
+.login-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: #f8f9fb;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  max-width: 440px;
+
+  padding: 40px 35px;
+  background: white;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.05);
+}
+
+.login-container h1 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.login-container > span {
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 15px 14px;
+
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+
+  background: white;
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-form input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+.login-form .register-button {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 0;
+
+  background: #111827;
+  color: white;
+
+  border: none;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-form .register-button:hover {
+  background: #374151;
+}
+
+.login-register-link {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.login-register-link a {
+  color: #111827;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.login-register-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    padding: 30px 16px;
+    min-height: 65vh;
+  }
+
+  .login-container {
+    padding: 32px 22px;
+  }
+}
+.loading-container {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.loading-spinner {
+  animation: spin 0.8s linear infinite;
+  color: #111827;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.not-empty-favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 12px;
+  padding: 14px 28px;
+
+  background: #111827;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  max-width: 200px;
+  transition: background 0.2s;
+}
+
+.not-empty-favorite-btn:hover {
+  background: #374151;
+}
+.favorite-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}

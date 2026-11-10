@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createClient } from "../lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 
 export default function Header(){
@@ -25,6 +26,7 @@ export default function Header(){
   const [user, setUser] = useState(null);
   const [signOff,setSignOff]=useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     async function checkUser() {
@@ -65,21 +67,28 @@ export default function Header(){
   loadCat();
 }, []);
 
-    useEffect(() => {
-    const favorites = JSON.parse(
-      localStorage.getItem("favorites") || "[]"
-    );
-
-    setFavoritesCount(favorites.length);
-  }, []);
-
   useEffect(() => {
-    function updateFavoritesCount() {
+    async function updateFavoritesCount() {
+      if(!user){
       const favorites = JSON.parse(
         localStorage.getItem("favorites") || "[]"
       );
 
       setFavoritesCount(favorites.length);
+    }
+    else{
+      const {data,error}= await supabase
+        .from("favorites")
+        .select("*")
+        .eq("user_id",user.id);
+
+      if(error){
+      console.log("error retieve favorites",error);
+      return;
+    }
+    setFavoritesCount(data.length);  
+    }
+    
     }
 
     updateFavoritesCount();
@@ -89,7 +98,7 @@ export default function Header(){
     return () => {
       window.removeEventListener("favoritesChanged", updateFavoritesCount);
     };
-  }, []);
+  }, [user?.id]);
 
     useEffect(() => {
       setOpenCategories(false);
@@ -110,6 +119,7 @@ export default function Header(){
     return;
     }
     setSignOff(false);
+    router.replace("/");
   }
 
   return(

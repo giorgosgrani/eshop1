@@ -15,41 +15,21 @@ export default function ProductCard({
   link,
   sizes,
   isOutOfStock = false,
-  initialFavorite = false
+  initialFavorite = false,
+  userId = null,
+  onFavoriteRemoved
 }) {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const supabase =createClient();
-  const [user, setUser] = useState(null);
-
-  useEffect(()=>{
-    async function checkUser() {
-      const { data: { user },error } = await supabase.auth.getUser();
-
-      if(error&& error.name !== "AuthSessionMissingError"){
-        console.error("Auth error:", error.message);
-        return;
-      }
-      if(user){
-        setUser(user);
-      }else {
-        const favorites = JSON.parse(
-          localStorage.getItem("favorites") || "[]"
-        );
-
-        setIsFavorite(favorites.includes(id));
-      }
-  }
-  checkUser();
-  },[]);
   
-  async function handleFavorites(isFavorite,product_id,user){
+  async function handleFavorites(isFavorite,product_id){
 
-    if(user){
+    if(userId){
       if(isFavorite){
         const {error}=await supabase
           .from("favorites")
           .insert({
-            user_id:user.id,
+            user_id:userId,
             product_id:product_id
           })
 
@@ -62,7 +42,7 @@ export default function ProductCard({
         const {error}=await supabase
           .from("favorites")
           .delete()
-          .eq("user_id",user.id)
+          .eq("user_id",userId)
           .eq("product_id",id)
 
         if(error){
@@ -70,7 +50,14 @@ export default function ProductCard({
           return;
         }
       }
-    setIsFavorite(isFavorite);  
+    setIsFavorite(isFavorite);
+    
+    
+
+    if (!isFavorite) {
+      onFavoriteRemoved?.(product_id);
+    }  
+    window.dispatchEvent(new Event("favoritesChanged"));
     }
     else {
       const favorites = JSON.parse(
@@ -89,8 +76,11 @@ export default function ProductCard({
       }
 
     localStorage.setItem("favorites", JSON.stringify(favorites));
-    window.dispatchEvent(new Event("favoritesChanged"));
-
+    
+      if (!isFavorite) {
+      onFavoriteRemoved?.(product_id);
+    } 
+    window.dispatchEvent(new Event("favoritesChanged")); 
     setIsFavorite(isFavorite);
     }
     
@@ -107,7 +97,7 @@ export default function ProductCard({
           className="favorite-btn"
           onClick={() =>{
             const newFav =!isFavorite;
-            handleFavorites(newFav,id,user)
+            handleFavorites(newFav,id)
             }
           }
           aria-label={isFavorite ? "Αφαίρεση από αγαπημένα" : "Προσθήκη στα αγαπημένα"}

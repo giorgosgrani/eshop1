@@ -26,6 +26,23 @@ export default async function ProductsPage({ searchParams }) {
     return <p>Πρόβλημα κατά τη φόρτωση προϊόντων.</p>;
   }
 
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let favoriteIds = [];
+
+  if (user) {
+    const { data: favorites, error: favoritesError } = await supabase
+      .from("favorites")
+      .select("product_id")
+      .eq("user_id", user.id);
+
+    if (favoritesError) {
+      console.error(favoritesError);
+    } else {
+      favoriteIds = (favorites ?? []).map(item => item.product_id);
+    }
+  }
+
   // 3. Προσαρμόζουμε τα δεδομένα στο ProductCard
   const products = (data ?? []).map((product) => ({
     id: product.id,
@@ -93,7 +110,12 @@ export default async function ProductsPage({ searchParams }) {
 
         <div className="products-grid">
           {sortedProducts.map((product) => (
-            <ProductCard key={product.id} {...product} />
+            <ProductCard 
+              key={product.id} 
+              {...product} 
+              initialFavorite={favoriteIds.includes(product.id)}
+              userId={user?.id ?? null}
+              />
           ))}
         </div>
       </div>
