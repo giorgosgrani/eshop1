@@ -17,7 +17,9 @@ const categories = [
 const clothesSizes = ["XS", "S", "M", "L", "XL"];
 const shoeSizes = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45"];
 
-export default function ProductFilters({ maxPriceStart = 250 }) {
+export default function ProductFilters({ maxPriceStart = 250,type
+
+ }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -57,7 +59,7 @@ export default function ProductFilters({ maxPriceStart = 250 }) {
     const query = params.toString();
 
     router.replace(
-      query ? `/products?${query}` : "/products",
+      query ? `/${type}?${query}` : `/${type}`,
       { scroll: false }
     );
   };
@@ -74,7 +76,7 @@ export default function ProductFilters({ maxPriceStart = 250 }) {
     const query = params.toString();
 
     router.push(
-      query ? `/products?${query}` : "/products",
+      query ? `/${type}?${query}` : `/${type}`,
       { scroll: false }
     );
   };
@@ -102,8 +104,8 @@ export default function ProductFilters({ maxPriceStart = 250 }) {
               key={category.name}
               href={
                 category.slug
-                  ? `/products?category=${category.slug}`
-                  : "/products"
+                  ? `/${type}?category=${category.slug}`
+                  : `/${type}`
               }
               className={
                 selectedCategory === category.slug ? "active" : ""

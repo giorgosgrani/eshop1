@@ -17,10 +17,11 @@ export default async function Discounts({ searchParams }) {
     .select(`
       *,
       categories(slug),
-      product_variants(size, stock),
+      product_variants(id,size, stock),
       product_images(image_url, sort_order)
     `)
-    .eq("is_active", true);
+    .eq("is_active", true)
+    .not("original_price", "is", null);
 
   if (error) {
     console.error("Error fetching products:", error.message);
@@ -58,8 +59,11 @@ export default async function Discounts({ searchParams }) {
     link: `/products/${product.slug}`,
     isFeatured: product.is_featured,
     sizes: (product.product_variants ?? [])
-      .filter((variant) => variant.stock > 0)
-      .map((variant) => variant.size),
+    .filter((variant) => variant.stock > 0)
+    .map((variant) => ({
+      id: variant.id,
+      size: variant.size
+    })),
     isOutOfStock: (product.product_variants ?? [])
       .every((variant) => variant.stock === 0),
     images: [
@@ -86,7 +90,9 @@ export default async function Discounts({ searchParams }) {
       !price || product.price <= Number(price);
 
     const matchesSize =
-      !size || size === "all" || product.sizes.includes(size);
+    !size ||
+    size === "all" ||
+    product.sizes.some((variant) => variant.size === size);
 
     return matchesPrice && matchesSize;
   });
@@ -105,13 +111,13 @@ export default async function Discounts({ searchParams }) {
         <p>{filteredProducts.length} προϊόντα</p>
 
         <Suspense fallback={null}>
-          <ProductSort />
+          <ProductSort type="discounts"/>
         </Suspense>
       </div>
 
       <div className="products-layout">
         <Suspense fallback={<p>Φόρτωση φίλτρων...</p>}>
-          <ProductFilters maxPriceStart={maxPriceStart} />
+          <ProductFilters maxPriceStart={maxPriceStart} type="discounts"/>
         </Suspense>
 
         <div className="products-grid">

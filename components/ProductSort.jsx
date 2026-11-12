@@ -3,7 +3,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function ProductSort() {
+export default function ProductSort({type}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -16,7 +16,7 @@ export default function ProductSort() {
       params.delete("sort");
     }
 
-    router.replace(`/products?${params.toString()}`, {
+    router.replace(`/${type}?${params.toString()}`, {
       scroll: false,
     });
   };

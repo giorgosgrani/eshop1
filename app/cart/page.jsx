@@ -9,66 +9,6 @@ export default function CartPage() {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
-  useEffect(() => {
-    try {
-      const savedCart = JSON.parse(
-        localStorage.getItem("eshop-cart") || "[]"
-      );
-
-      setCart(Array.isArray(savedCart) ? savedCart : []);
-    } catch {
-      setCart([]);
-    }
-
-    setLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (loaded) {
-      localStorage.setItem("eshop-cart", JSON.stringify(cart));
-    }
-  }, [cart, loaded]);
-
-  const updateQuantity = (id, size, amount) => {
-    setCart((currentCart) =>
-      currentCart.map((product) =>
-        product.id === id && product.size === size
-          ? {
-              ...product,
-              quantity: Math.max(1, product.quantity + amount),
-            }
-          : product
-      )
-    );
-  };
-
-  const removeProduct = (id, size) => {
-    setCart((currentCart) =>
-      currentCart.filter(
-        (product) => !(product.id === id && product.size === size)
-      )
-    );
-  };
-
-  const subtotal = cart.reduce(
-    (total, product) => total + product.price * product.quantity,
-    0
-  );
-
-  const totalItems = cart.reduce(
-    (total, product) => total + product.quantity,
-    0
-  );
-
-  const formatPrice = (price) =>
-    Number(price).toLocaleString("el-GR", {
-      style: "currency",
-      currency: "EUR",
-    });
-
-  if (!loaded) {
-    return <main className="cart-page">Φόρτωση καλαθιού...</main>;
-  }
 
   return (
     <main className="cart-page">
@@ -76,7 +16,7 @@ export default function CartPage() {
         <div>
           <span className="cart-eyebrow">ESHOP / ΚΑΛΑΘΙ</span>
           <h1>Το καλάθι μου</h1>
-          <p>{totalItems} προϊόντα στο καλάθι σου</p>
+          <p>{0} προϊόντα στο καλάθι σου</p>
         </div>
 
         <Link href="/products" className="cart-back">

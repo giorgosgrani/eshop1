@@ -23,6 +23,8 @@ export default function ProductCard({
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const [currentImage, setCurrentImage] = useState(0);
   const supabase =createClient();
+  const [selectedSize,setSelectedSize]=useState(null);
+  const[message,setMessage]=useState("");
 
   useEffect(() => {
     if (userId) return;
@@ -115,6 +117,17 @@ export default function ProductCard({
       }
     }
   }
+  function addToCart(){
+    if(selectedSize===null){
+      showMessage("Επιλέξτε ένα μέγεθος")
+    }
+  }
+
+  function showMessage(text){
+    setMessage(text);
+    setTimeout(()=>{setMessage("")},2000);
+
+  }
 
   return (
     <div className="product-card">
@@ -172,12 +185,20 @@ export default function ProductCard({
             <span>Εξαντλήθηκε</span>
           ) : (
             sizes.map((size) => (
-              <span key={size}>{size}</span>
+              <button 
+               key={size.id}
+               className= {`size-selector ${selectedSize === size.size?"active":""}`}
+               onClick={()=>setSelectedSize(selectedSize===size.size?null:size.size)}
+               >{size.size}</button>
             ))
           )}
         </span>
+        <span>{message}</span>
       </div>
-      <div className="add-to-cart"><ShoppingCart size={20} color="white"/>Προσθήκη στο καλάθι</div>
+      
+      <div className="add-to-cart"
+        onClick={addToCart}
+      ><ShoppingCart size={20} color="white"/>Προσθήκη στο καλάθι</div>
     </div>
   );
 }

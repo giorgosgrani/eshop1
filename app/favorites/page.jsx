@@ -73,7 +73,8 @@ useEffect(() => {
         .select(`
           *,
           categories(slug),
-          product_variants(size, stock)
+          product_variants(id,size, stock),
+           product_images(image_url, sort_order)
         `)
         .in("id", favoriteIds)
         .eq("is_active", true);
@@ -94,12 +95,20 @@ useEffect(() => {
           product.original_price == null
             ? null
             : Number(product.original_price),
-        image: product.image,
+        images: [
+          product.image,
+            ...(product.product_images ?? [])
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map(item => item.image_url)
+          ].filter(Boolean),    
         category: product.categories?.slug,
         link: `/products/${product.slug}`,
         sizes: (product.product_variants ?? [])
-          .filter(variant => variant.stock > 0)
-          .map(variant => variant.size)
+        .filter((variant) => variant.stock > 0)
+        .map((variant) => ({
+          id: variant.id,
+          size: variant.size
+        })),
       }));
 
       setProducts(productsShow);

@@ -10,7 +10,7 @@ import {
   Menu,
   X
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef  } from "react";
 import { createClient } from "../lib/supabase/client";
 import { useRouter } from "next/navigation";
 
@@ -27,6 +27,57 @@ export default function Header(){
   const [signOff,setSignOff]=useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const router = useRouter();
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const [search,setSearch]=useState("");
+  const [searchResults, setSearchResults] = useState([]);
+
+  useEffect(()=>{
+    async function searchProducts(){
+      const { data, error } = await supabase
+        .rpc("search_products", {
+          search_term: search
+      });
+
+      if (error) {
+        console.error(error);
+        return;
+      } 
+      setSearchResults(data ?? []); 
+    }
+    if (search.trim()) {
+    searchProducts();
+    } else {
+    setSearchResults([]);
+    }
+  },[search]);
+
+  useEffect(() => {
+    function handleScroll() {
+      const currentScrollY = Math.max(0, window.scrollY);
+      const difference = currentScrollY - lastScrollY.current;
+
+      if (currentScrollY < 80) {
+        setHeaderVisible(true);
+      } else if (difference > 5) {
+        setHeaderVisible(false);
+      } else if (difference < -5) {
+        setHeaderVisible(true);
+      }
+
+      if (Math.abs(difference) > 5) {
+        lastScrollY.current = currentScrollY;
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     async function checkUser() {
@@ -123,7 +174,9 @@ export default function Header(){
   }
 
   return(
-    <header className="site-header">
+    <header
+      className={`site-header ${headerVisible ? "" : "header-hidden"}`}
+    >
       <div className="header-container">
 
         <Link className="logo" href="/">Eshop logo</Link>
@@ -168,9 +221,25 @@ export default function Header(){
           type="search"
           placeholder="Αναζήτηση προϊόντων..."
           aria-label="Αναζήτηση προϊόντων"
+          onChange={(e)=>setSearch(e.target.value)}
         />
+        {search &&
+        <div className="search-dropdown" >
+          {searchResults.map((result) =>(
+            <div className="result-row" key={result?.id}>
+              <Link 
+                href={`/products`}
+                >
+                  {result.name}  <b>{result.price} €</b>
+              </Link>
+              <img
+                src={result.image}
+                alt={result.name}
+              />
+            </div>
+          ))}
+        </div>}
       </div>
-
         
       <div className="header-actions">
         {user && firstLetter && (
