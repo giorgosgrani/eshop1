@@ -24,7 +24,7 @@ export default function FeaturedProducts() {
           original_price,
           image,
           is_featured,
-          product_variants(size, stock),
+          product_variants(id,size, stock),
           product_images(image_url, sort_order)
         `)
         .eq("is_featured", true)
@@ -46,8 +46,11 @@ export default function FeaturedProducts() {
         link: `/products/${product.slug}`,
         isFeatured: product.is_featured,
         sizes: (product.product_variants ?? [])
-          .filter((variant) => variant.stock > 0)
-          .map((variant) => variant.size),
+        .filter((variant) => variant.stock > 0)
+        .map((variant) => ({
+          id: variant.id,
+          size: variant.size
+        })),
         images: [
           product.image,
           ...(product.product_images ?? [])
