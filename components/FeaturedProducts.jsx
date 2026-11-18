@@ -34,6 +34,7 @@ export default function FeaturedProducts() {
         console.error("Σφάλμα Supabase:", error.message);
         return;
       }
+      console.log(data);
 
       const formattedProducts = (data ?? []).map((product) => ({
         id: product.id,

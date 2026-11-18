@@ -3380,3 +3380,57 @@ main {
 .size-selector.active{
   background-color: #8f97a9;
 }
+
+.cart-quantity-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 90%;
+  background: #181818;
+  color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  height:35px;
+  margin-top: auto;
+}
+
+.cart-quantity-controls button {
+  width: 48px;
+  height: 44px;
+  background: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 24px;
+}
+
+.cart-quantity-controls button:hover:not(:disabled) {
+  background: #333;
+}
+
+.cart-quantity-controls button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cart-quantity-controls span {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+button.add-to-cart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 90%;
+  cursor: pointer;
+  margin-bottom: 20px;
+  margin-left: auto;
+  margin-right: auto;
+  height:35px;
+  margin-top: auto;
+}

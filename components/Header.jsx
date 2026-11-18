@@ -23,6 +23,7 @@ export default function Header(){
   const searchParams = useSearchParams();
   const [categories,setCategories]= useState([]);
   const [favoritesCount, setFavoritesCount] = useState(0);
+  const [cartCount,setCartCount]=useState(0);
   const [user, setUser] = useState(null);
   const [signOff,setSignOff]=useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -148,6 +149,56 @@ export default function Header(){
 
     return () => {
       window.removeEventListener("favoritesChanged", updateFavoritesCount);
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    async function updateCartCount() {
+      if (!user) {
+        setCartCount(0);
+        return;
+      }
+
+      const { data: cart, error: cartError } = await supabase
+        .from("carts")
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (cartError) {
+        console.error("Error retrieving cart:", cartError);
+        return;
+      }
+
+      if (!cart) {
+        setCartCount(0);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("cart_items")
+        .select("quantity")
+        .eq("cart_id", cart.id);
+
+      if (error) {
+        console.error("Error retrieving cart items:", error);
+        return;
+      }
+
+      const total = (data ?? []).reduce(
+        (sum, item) => sum + item.quantity,
+        0
+      );
+
+      setCartCount(total);
+    }
+
+    updateCartCount();
+
+    window.addEventListener("cartChanged", updateCartCount);
+
+    return () => {
+      window.removeEventListener("cartChanged", updateCartCount);
     };
   }, [user?.id]);
 
@@ -290,7 +341,7 @@ export default function Header(){
 
         <Link href="/cart" className={pathname === "/cart" ? "selected" : "header-action"}>
           <ShoppingCart size={22} />
-          <span>Καλάθι (0)</span>
+          <span>Καλάθι ({cartCount})</span>
         </Link>
       </div>
       

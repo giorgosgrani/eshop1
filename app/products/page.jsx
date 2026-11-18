@@ -11,6 +11,7 @@ export default async function ProductsPage({ searchParams }) {
   // 1. Δημιουργούμε τον Supabase client στον server
   const supabase = await createClient();
 
+
   // 2. Φέρνουμε τα ενεργά προϊόντα από τη βάση
   const { data, error } = await supabase
     .from("products")
@@ -30,6 +31,7 @@ export default async function ProductsPage({ searchParams }) {
   const { data: { user } } = await supabase.auth.getUser();
 
   let favoriteIds = [];
+  let cartItems =[];
 
   if (user) {
     const { data: favorites, error: favoritesError } = await supabase
@@ -41,6 +43,30 @@ export default async function ProductsPage({ searchParams }) {
       console.error(favoritesError);
     } else {
       favoriteIds = (favorites ?? []).map(item => item.product_id);
+    }
+
+    const{data:cart,error:cart_error}= await supabase
+      .from("carts")
+      .select("*")
+      .eq("user_id",user.id)
+      .maybeSingle();
+
+    if(cart_error){
+      console.log(cart_error);
+      return;
+    }
+    
+    if (cart) {
+      const { data: items, error: itemsError } = await supabase
+        .from("cart_items")
+        .select("variant_id, quantity")
+        .eq("cart_id", cart.id);
+
+      if (itemsError) {
+        console.error("Error fetching cart items:", itemsError);
+      } else {
+        cartItems = items ?? [];
+      }
     }
   }
 
@@ -61,7 +87,8 @@ export default async function ProductsPage({ searchParams }) {
     .filter((variant) => variant.stock > 0)
     .map((variant) => ({
       id: variant.id,
-      size: variant.size
+      size: variant.size,
+      stock:variant.stock
     })),
     isOutOfStock: (product.product_variants ?? [])
       .every((variant) => variant.stock === 0),
@@ -126,6 +153,8 @@ export default async function ProductsPage({ searchParams }) {
               {...product} 
               initialFavorite={favoriteIds.includes(product.id)}
               userId={user?.id ?? null}
+              initialCartItems={cartItems.filter((item) =>
+                product.sizes.some((variant) => variant.id === item.variant_id))}
               />
           ))}
         </div>
