@@ -155,7 +155,12 @@ export default function Header(){
   useEffect(() => {
     async function updateCartCount() {
       if (!user) {
-        setCartCount(0);
+        const guestCart= JSON.parse(localStorage.getItem("guest-cart"|| []));
+
+        const total = (guestCart ?? []).reduce(
+          (sum,item)=>sum + item.quantity
+          ,0);
+        setCartCount(total);
         return;
       }
 

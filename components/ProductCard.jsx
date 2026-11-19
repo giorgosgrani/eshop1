@@ -39,8 +39,27 @@ export default function ProductCard({
     )
   );
 
+  useEffect(()=>{
+    if(userId)return;
+
+    const guestCart = JSON.parse(
+      localStorage.getItem("guest-cart") || "[]"
+    );
+    setCartQuantities(
+      Object.fromEntries(
+        guestCart.map((item) => [
+          item.variant_id,
+          item.quantity
+        ])
+      )
+    );
+
+    //console.log("Guest cart:", guestCart);
+  },[userId]);
+
   // Συγχρονισμός ποσοτήτων όταν αλλάζουν τα δεδομένα του server
   useEffect(() => {
+    if(userId){
     setCartQuantities(
       Object.fromEntries(
         initialCartItems.map((item) => [
@@ -48,8 +67,8 @@ export default function ProductCard({
           item.quantity
         ])
       )
-    );
-  }, [initialCartItems]);
+    );}
+  }, [initialCartItems,userId]);
 
   useEffect(() => {
     if (userId) return;
@@ -187,10 +206,6 @@ export default function ProductCard({
       return;
     }
 
-    if (!userId) {
-      showMessage("Πρέπει πρώτα να συνδεθείτε");
-      return;
-    }
 
     if (!selectedVariant) {
       showMessage("Το μέγεθος δεν βρέθηκε");
@@ -201,8 +216,34 @@ export default function ProductCard({
       showMessage("Το προϊόν έχει εξαντληθεί");
       return;
     }
+     if (!userId) {
+      const guestCart = JSON.parse(
+        localStorage.getItem("guest-cart") || "[]"
+      );
+
+
+      guestCart.push({
+        variant_id: selectedVariant.id,
+        quantity: 1
+      });
+
+      localStorage.setItem("guest-cart",JSON.stringify(guestCart));
+      
+      setCartQuantities((previous) => ({
+      ...previous,
+      [selectedVariant.id]: 1
+      }));
+
+      window.dispatchEvent(new Event("cartChanged"));
+
+      showMessage("Προστέθηκε στο καλάθι");
+      return;
+
+    }
 
     if (updatingRef.current) return;
+
+
 
     updatingRef.current = true;
     setIsUpdating(true);
@@ -226,6 +267,7 @@ export default function ProductCard({
         ...previous,
         [selectedVariant.id]: 1
       }));
+      window.dispatchEvent(new Event("cartChanged"));
 
       showMessage("Προστέθηκε στο καλάθι");
 
@@ -248,7 +290,7 @@ export default function ProductCard({
   }
 
   async function changeQuantity(move) {
-    if (!selectedVariant || !userId || updatingRef.current) {
+    if (!selectedVariant || updatingRef.current) {
       return;
     }
 
@@ -263,10 +305,42 @@ export default function ProductCard({
       );
       return;
     }
+    
 
     updatingRef.current = true;
     setIsUpdating(true);
+    
+    if(!userId){
+      const guestCart = JSON.parse(
+        localStorage.getItem("guest-cart") || "[]"
+      );
 
+      let updatedCart;
+
+      if(newQuantity===0){
+
+        updatedCart = guestCart.filter((item)=>item.variant_id !==variantId);
+      }
+      else{
+        updatedCart = guestCart.map((item)=>
+          item.variant_id === variantId?
+            {...item,quantity:newQuantity}:item
+        );
+      }
+      localStorage.setItem("guest-cart",JSON.stringify(updatedCart));
+
+      setCartQuantities((previous)=>({
+        ...previous,
+        [variantId]:newQuantity,
+      }));
+      window.dispatchEvent(new Event("cartChanged"));
+
+      updatingRef.current = false;
+      setIsUpdating(false);
+    }
+
+
+    if(userId){
     try {
       const cartId = await getCardId();
 
@@ -298,6 +372,7 @@ export default function ProductCard({
         ...previous,
         [variantId]: newQuantity
       }));
+      window.dispatchEvent(new Event("cartChanged"));
 
     } catch (error) {
       console.error("Error changing quantity:", error);
@@ -307,6 +382,7 @@ export default function ProductCard({
       updatingRef.current = false;
       setIsUpdating(false);
     }
+  }
   }
 
   return (

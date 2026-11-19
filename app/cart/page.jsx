@@ -14,6 +14,8 @@ export default function CartPage() {
   const [cartId,setCartId]=useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [message,setMessage]=useState("");
+  const [isGuest, setIsGuest] = useState(false);
+  const [focused,setFocused]=useState(null);
 
   useEffect(() => {
     async function checkUser() {
@@ -24,11 +26,63 @@ export default function CartPage() {
         if (error && user) {
           throw error;
         }
-
+        setIsGuest(!user);
         if (!user) {
-          setCart([]);
-          return;
-        }
+  const guestCart = JSON.parse(
+    localStorage.getItem("guest-cart") || "[]"
+  );
+
+  if (guestCart.length === 0) {
+    setCart([]);
+    return;
+  }
+
+  const variantIds = guestCart.map(
+    (item) => item.variant_id
+  );
+
+  const { data, error: guestError } = await supabase
+    .from("product_variants")
+    .select(`
+      id,
+      size,
+      stock,
+      products (
+        id,
+        name,
+        price,
+        image
+      )
+    `)
+    .in("id", variantIds);
+
+      if (guestError) {
+        throw guestError;
+      }
+
+      const cartProducts = (data ?? []).map((variant) => {
+
+        const product = variant.products;
+
+        const guestItem = guestCart.find(
+          (item) => item.variant_id === variant.id
+        );
+
+        return {
+          id: product.id,
+          variant_id: variant.id,
+          name: product.name,
+          price: product.price,
+          size: variant.size,
+          stock: variant.stock,
+          quantity: guestItem.quantity,
+          image: product.image
+        };
+      });
+
+      setCart(cartProducts);
+      return;
+    }
 
         const { data: userCart, error: cartError } = await supabase
           .from("carts")
@@ -40,10 +94,11 @@ export default function CartPage() {
           throw cartError;
         }
 
-        if (!userCart) {
+        if (!userCart && user) {
           setCart([]);
           return;
         }
+      
         setCartId(userCart.id)
         const { data, error: itemsError } = await supabase
           .from("cart_items")
@@ -71,12 +126,11 @@ export default function CartPage() {
         if (itemsError) {
           throw itemsError;
         }
-
         const cartProducts = (data ?? []).map((item) => {
           const variant = item.product_variants;
           const product = variant.products;
 
-
+          
           return {
             id: product.id,
             variant_id: variant.id,
@@ -97,6 +151,7 @@ export default function CartPage() {
       } finally {
         setLoaded(true);
       }
+      
     }
 
     checkUser();
@@ -127,28 +182,55 @@ export default function CartPage() {
     }, 2000);
   }
 
-  async function changeQuantity(move,item,del=false) {
-    if (!item.variant_id || updatingRef.current) {
-      return;
-    }
+async function changeQuantity(move, item, del = false) {
+  if (!item.variant_id || updatingRef.current) {
+    return;
+  }
 
-    const newQuantity = item.quantity + move;
+  const newQuantity = item.quantity + move;
 
-    if (newQuantity < 0) return;
+  if (!del && newQuantity < 0) return;
 
-    if (move > 0 && newQuantity > item.stock) {
-      showMessage(
-        "Έχετε επιλέξει τη μέγιστη ποσότητα για αυτό το προϊόν"
+  if (move > 0 && newQuantity > item.stock) {
+    setFocused(item.variant_id);
+    showMessage(
+      "Έχετε επιλέξει τη μέγιστη ποσότητα για αυτό το προϊόν"
+    );
+    return;
+  }
+
+  updatingRef.current = true;
+  setIsUpdating(true);
+
+  try {
+    if (isGuest) {
+      const guestCart = JSON.parse(
+        localStorage.getItem("guest-cart") || "[]"
       );
-      return;
-    }
-    if(updatingRef.current)return;
 
-    updatingRef.current = true;
-    setIsUpdating(true);
-    
+      let updatedCart;
 
-    try {
+      if (newQuantity === 0 || del) {
+        updatedCart = guestCart.filter(
+          (product) => product.variant_id !== item.variant_id
+        );
+      } else {
+        updatedCart = guestCart.map((product) =>
+          product.variant_id === item.variant_id
+            ? { ...product, quantity: newQuantity }
+            : product
+        );
+      }
+
+      localStorage.setItem(
+        "guest-cart",
+        JSON.stringify(updatedCart)
+      );
+
+    } else {
+      if (!cartId) {
+        throw new Error("Δεν βρέθηκε το καλάθι του χρήστη");
+      }
 
       if (newQuantity === 0 || del) {
         const { error } = await supabase
@@ -160,12 +242,7 @@ export default function CartPage() {
         if (error) {
           throw error;
         }
-        window.dispatchEvent(new Event("cartChanged"));
-        setCart((previous) =>
-          previous.filter(
-            (product) => product.variant_id !== item.variant_id
-          )
-        );
+
       } else {
         const { error } = await supabase
           .from("cart_items")
@@ -178,28 +255,36 @@ export default function CartPage() {
         if (error) {
           throw error;
         }
-        window.dispatchEvent(new Event("cartChanged"));
-        setCart((previous) =>
+      }
+    }
+
+    if (newQuantity === 0 || del) {
+      setCart((previous) =>
+        previous.filter(
+          (product) => product.variant_id !== item.variant_id
+        )
+      );
+    } else {
+      setCart((previous) =>
         previous.map((product) =>
           product.variant_id === item.variant_id
             ? { ...product, quantity: newQuantity }
             : product
         )
       );
-      }
-
-      
-
-    } catch (error) {
-      console.error("Error changing quantity:", error);
-      //showMessage("Αποτυχία ενημέρωσης ποσότητας");
-
-    } finally {
-      updatingRef.current = false;
-      setIsUpdating(false);
-      
     }
-  }  
+
+    window.dispatchEvent(new Event("cartChanged"));
+
+  } catch (error) {
+    console.error("Error changing quantity:", error);
+    showMessage("Αποτυχία ενημέρωσης ποσότητας");
+
+  } finally {
+    updatingRef.current = false;
+    setIsUpdating(false);
+  }
+}
 
   return (
     <main className="cart-page">
@@ -291,7 +376,7 @@ export default function CartPage() {
                       <Plus size={15} />
                     </button>
                   </div>
-                  <div>{message}</div>
+                  <div>{product.variant_id === focused && message}</div>
 
                   <strong>
                     {formatPrice(product.price * product.quantity)}
